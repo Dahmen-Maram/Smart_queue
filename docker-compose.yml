@@ -1,0 +1,104 @@
+services:
+  redis:
+    image: redis:7
+    container_name: redis-smartqueue
+    ports:
+      - "6380:6379"
+    networks: [smartqueue]
+
+  # ---------------- PATIENT ----------------
+  patient-service:
+    build: ./patient_service
+    ports:
+      - "8000:8000"
+    networks: [smartqueue]
+
+  patient-dapr:
+    image: daprio/daprd:1.16.5
+    command: [
+      "./daprd",
+      "-app-id", "patient-service",
+      "-app-port", "8000",
+      "-dapr-http-port", "3500",
+      "-resources-path", "/components"
+    ]
+    volumes:
+      - "./dapr:/components"
+    depends_on:
+      - patient-service
+      - redis
+    network_mode: "service:patient-service"
+
+  # ---------------- QUEUE ----------------
+  queue-service:
+    build: ./queue_service
+    ports:
+      - "8010:8010"
+    environment:
+      - DAPR_HTTP_PORT=3501
+    networks: [smartqueue]
+
+  queue-dapr:
+    image: daprio/daprd:1.16.5
+    command: [
+      "./daprd",
+      "-app-id", "queue-service",
+      "-app-port", "8010",
+      "-dapr-http-port", "3501",
+      "-resources-path", "/components"
+    ]
+    volumes:
+      - "./dapr:/components"
+    depends_on:
+      - queue-service
+      - redis
+    network_mode: "service:queue-service"
+
+  # ---------------- IA ----------------
+  ia-service:
+    build: ./ia_service
+    ports:
+      - "8020:8020"
+    networks: [smartqueue]
+
+  ia-dapr:
+    image: daprio/daprd:1.16.5
+    command: [
+      "./daprd",
+      "-app-id", "ia-service",
+      "-app-port", "8020",
+      "-dapr-http-port", "3502",
+      "-resources-path", "/components"
+    ]
+    volumes:
+      - "./dapr:/components"
+    depends_on:
+      - ia-service
+      - redis
+    network_mode: "service:ia-service"
+
+  # ---------------- NOTIFICATION ----------------
+  notification-service:
+    build: ./notification_service
+    ports:
+      - "8030:8030"
+    networks: [smartqueue]
+
+  notification-dapr:
+    image: daprio/daprd:1.16.5
+    command: [
+      "./daprd",
+      "-app-id", "notification-service",
+      "-app-port", "8030",
+      "-dapr-http-port", "3503",
+      "-resources-path", "/components"
+    ]
+    volumes:
+      - "./dapr:/components"
+    depends_on:
+      - notification-service
+      - redis
+    network_mode: "service:notification-service"
+
+networks:
+  smartqueue:
