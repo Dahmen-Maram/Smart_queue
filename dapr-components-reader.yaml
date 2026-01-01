@@ -1,0 +1,10 @@
+# dapr-components-reader.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: dapr-components-reader
+  namespace: smartqueue
+rules:
+- apiGroups: ["dapr.io"]
+  resources: ["components", "subscriptions"]
+  verbs: ["get", "list", "watch"]

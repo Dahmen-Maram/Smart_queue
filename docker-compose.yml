@@ -1,104 +1,142 @@
 services:
   redis:
     image: redis:7
-    container_name: redis-smartqueue
     ports:
       - "6380:6379"
     networks: [smartqueue]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   # ---------------- PATIENT ----------------
   patient-service:
     build: ./patient_service
     ports:
       - "8000:8000"
+      - "3500:3500"   # dapr http
     networks: [smartqueue]
+    environment:
+      - DAPR_HTTP_PORT=3500
 
   patient-dapr:
     image: daprio/daprd:1.16.5
-    command: [
-      "./daprd",
-      "-app-id", "patient-service",
-      "-app-port", "8000",
-      "-dapr-http-port", "3500",
-      "-resources-path", "/components"
-    ]
+    command:
+      [
+        "./daprd",
+        "-app-id","patient-service",
+        "-app-port","8000",
+        "-dapr-http-port","3500",
+        "-dapr-grpc-port","50001",
+        "-resources-path","/components",
+        "-log-level","debug"
+      ]
     volumes:
       - "./dapr:/components"
     depends_on:
-      - patient-service
-      - redis
+      redis:
+        condition: service_healthy
+      patient-service:
+        condition: service_started
     network_mode: "service:patient-service"
+    restart: unless-stopped
 
   # ---------------- QUEUE ----------------
   queue-service:
     build: ./queue_service
     ports:
       - "8010:8010"
+      - "3501:3501"
+    networks: [smartqueue]
     environment:
       - DAPR_HTTP_PORT=3501
-    networks: [smartqueue]
 
   queue-dapr:
     image: daprio/daprd:1.16.5
-    command: [
-      "./daprd",
-      "-app-id", "queue-service",
-      "-app-port", "8010",
-      "-dapr-http-port", "3501",
-      "-resources-path", "/components"
-    ]
+    command:
+      [
+        "./daprd",
+        "-app-id","queue-service",
+        "-app-port","8010",
+        "-dapr-http-port","3501",
+        "-dapr-grpc-port","50002",
+        "-resources-path","/components",
+        "-log-level","debug"
+      ]
     volumes:
       - "./dapr:/components"
     depends_on:
-      - queue-service
-      - redis
+      redis:
+        condition: service_healthy
+      queue-service:
+        condition: service_started
     network_mode: "service:queue-service"
+    restart: unless-stopped
 
   # ---------------- IA ----------------
   ia-service:
     build: ./ia_service
     ports:
       - "8020:8020"
+      - "3502:3502"
     networks: [smartqueue]
+    environment:
+      - DAPR_HTTP_PORT=3502
 
   ia-dapr:
     image: daprio/daprd:1.16.5
-    command: [
-      "./daprd",
-      "-app-id", "ia-service",
-      "-app-port", "8020",
-      "-dapr-http-port", "3502",
-      "-resources-path", "/components"
-    ]
+    command:
+      [
+        "./daprd",
+        "-app-id","ia-service",
+        "-app-port","8020",
+        "-dapr-http-port","3502",
+        "-dapr-grpc-port","50003",
+        "-resources-path","/components",
+        "-log-level","debug"
+      ]
     volumes:
       - "./dapr:/components"
     depends_on:
-      - ia-service
-      - redis
+      redis:
+        condition: service_healthy
+      ia-service:
+        condition: service_started
     network_mode: "service:ia-service"
+    restart: unless-stopped
 
   # ---------------- NOTIFICATION ----------------
   notification-service:
     build: ./notification_service
     ports:
       - "8030:8030"
+      - "3503:3503"
     networks: [smartqueue]
+    environment:
+      - DAPR_HTTP_PORT=3503
 
   notification-dapr:
     image: daprio/daprd:1.16.5
-    command: [
-      "./daprd",
-      "-app-id", "notification-service",
-      "-app-port", "8030",
-      "-dapr-http-port", "3503",
-      "-resources-path", "/components"
-    ]
+    command:
+      [
+        "./daprd",
+        "-app-id","notification-service",
+        "-app-port","8030",
+        "-dapr-http-port","3503",
+        "-dapr-grpc-port","50004",
+        "-resources-path","/components",
+        "-log-level","debug"
+      ]
     volumes:
       - "./dapr:/components"
     depends_on:
-      - notification-service
-      - redis
+      redis:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
     network_mode: "service:notification-service"
+    restart: unless-stopped
 
 networks:
-  smartqueue:
+  smartqueue: {}

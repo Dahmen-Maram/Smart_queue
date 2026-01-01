@@ -7,6 +7,6 @@ spec:
   version: v1
   metadata:
     - name: redisHost
-      value: 127.0.0.1:6380
-    - name: enableTLS
-      value: "false"
+      value: redis:6379
+    - name: redisPassword
+      value: ""

@@ -7,9 +7,8 @@ spec:
   version: v1
   metadata:
     - name: redisHost
-      value: 127.0.0.1:6380
+      value: redis:6379
     - name: redisPassword
       value: ""
-    # Recommandé pour ne pas perdre des données sur des gros payloads
     - name: enableTLS
       value: "false"

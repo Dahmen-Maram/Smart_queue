@@ -1,0 +1,23 @@
+apiVersion: dapr.io/v1alpha1
+kind: Resiliency
+metadata:
+  name: smartqueue-resiliency
+  namespace: smartqueue
+spec:
+  policies:
+    retries:
+      pubsubRetry:
+        policy: exponential
+        maxRetries: 10
+        maxInterval: 30s
+        duration: 2m
+  targets:
+    apps:
+      queue-service:
+        retry: pubsubRetry
+      notification-service:
+        retry: pubsubRetry
+      ia-service:
+        retry: pubsubRetry
+      patient-service:
+        retry: pubsubRetry

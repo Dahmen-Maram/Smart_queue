@@ -249,6 +249,25 @@ def stats():
 
     queues.sort(key=lambda x: x["size"], reverse=True)
     return {"total_patients": total, "queues": queues}
+@app.delete("/reset/{speciality}")
+def reset_queue(speciality: str):
+    key = queue_key(speciality)
+    state_set(key, [])
+    emit_queue_updated(speciality, 0)
+    return {"message": "queue reset", "speciality": speciality, "key": key, "size": 0}
+
+@app.get("/stats")
+def stats():
+    # Simple version: on calcule à partir des spécialités connues
+    # (comme on ne peut pas "lister les keys" facilement avec Dapr state API)
+    specialities = ["Cardio", "Urgence", "Pediatrie", "General"]
+    queues = []
+    total = 0
+    for spec in specialities:
+        q = state_get(queue_key(spec)) or []
+        queues.append({"speciality": spec, "size": len(q)})
+        total += len(q)
+    return {"total_patients": total, "queues": queues}
 
 @app.get("/")
 def health():

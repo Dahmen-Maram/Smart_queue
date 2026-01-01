@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: patient-dapr-metrics
+  namespace: smartqueue
+  labels:
+    monitor: dapr
+spec:
+  selector:
+    app: patient-service
+  ports:
+    - name: dapr-metrics
+      port: 9090
+      targetPort: 9090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: queue-dapr-metrics
+  namespace: smartqueue
+  labels:
+    monitor: dapr
+spec:
+  selector:
+    app: queue-service
+  ports:
+    - name: dapr-metrics
+      port: 9090
+      targetPort: 9090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ia-dapr-metrics
+  namespace: smartqueue
+  labels:
+    monitor: dapr
+spec:
+  selector:
+    app: ia-service
+  ports:
+    - name: dapr-metrics
+      port: 9090
+      targetPort: 9090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notif-dapr-metrics
+  namespace: smartqueue
+  labels:
+    monitor: dapr
+spec:
+  selector:
+    app: notification-service
+  ports:
+    - name: dapr-metrics
+      port: 9090
+      targetPort: 9090

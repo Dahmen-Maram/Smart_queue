@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: smartqueue-dapr
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - smartqueue
+  selector:
+    matchLabels:
+      monitor: dapr
+  endpoints:
+    - port: dapr-metrics
+      path: /metrics
+      interval: 15s

@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: smartqueue
+---
+# ------------------- PATIENT -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-service
+  namespace: smartqueue
+  labels: { app: patient-service }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: patient-service }
+  template:
+    metadata:
+      labels: { app: patient-service }
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "patient-service"
+        dapr.io/app-port: "8000"
+    spec:
+      containers:
+      - name: patient-service
+        image: smart_medical_queue-patient-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: patient-service
+  namespace: smartqueue
+spec:
+  selector: { app: patient-service }
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+
+---
+# ------------------- QUEUE -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: queue-service
+  namespace: smartqueue
+  labels: { app: queue-service }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: queue-service }
+  template:
+    metadata:
+      labels: { app: queue-service }
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "queue-service"
+        dapr.io/app-port: "8010"
+    spec:
+      containers:
+      - name: queue-service
+        image: smart_medical_queue-queue-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8010
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: queue-service
+  namespace: smartqueue
+spec:
+  selector: { app: queue-service }
+  ports:
+  - name: http
+    port: 8010
+    targetPort: 8010
+
+---
+# ------------------- IA -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ia-service
+  namespace: smartqueue
+  labels: { app: ia-service }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: ia-service }
+  template:
+    metadata:
+      labels: { app: ia-service }
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "ia-service"
+        dapr.io/app-port: "8020"
+    spec:
+      containers:
+      - name: ia-service
+        image: smart_medical_queue-ia-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8020
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ia-service
+  namespace: smartqueue
+spec:
+  selector: { app: ia-service }
+  ports:
+  - name: http
+    port: 8020
+    targetPort: 8020
+
+---
+# ------------------- NOTIFICATION -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: smartqueue
+  labels: { app: notification-service }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: notification-service }
+  template:
+    metadata:
+      labels: { app: notification-service }
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "notification-service"
+        dapr.io/app-port: "8030"
+    spec:
+      containers:
+      - name: notification-service
+        image: smart_medical_queue-notification-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8030
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: smartqueue
+spec:
+  selector: { app: notification-service }
+  ports:
+  - name: http
+    port: 8030
+    targetPort: 8030
